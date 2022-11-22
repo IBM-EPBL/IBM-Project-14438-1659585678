@@ -1,0 +1,86 @@
+VIDEO ANALYSIS
+from google.colab import drive
+drive.mount('/content/drive')
+Mounted at /content/drive
+import cv2 
+import numpy as np
+from google.colab.patches import cv2_imshow
+from matplotlib import pyplot as plt
+import librosa
+from tensorflow.keras.preprocessing import image
+from keras.models import load_model
+# Create a VideoCapture object and read from input file
+# If the input is the camera, pass 0 instead of the video file name
+cap = cv2.VideoCapture('/content/drive/MyDrive/IBM PROJECT/dataset/Forest 1.mp4')
+ 
+# Check if camera opened successfully
+if (cap.isOpened()== False): 
+  print("Error opening video stream or file")
+ 
+# Read until video is completed
+while(cap.isOpened()):
+  # Capture frame-by-frame
+  ret, frame = cap.read()
+  if ret == True:
+    x=image.img_to_array(frame)
+    res=cv2.resize(x,dsize=(64,64),interpolation=cv2.INTER_CUBIC)
+    #expand the image shape
+    x=np.expand_dims(res,axis=0)
+    model=load_model("/content/drive/MyDrive/IBM PROJECT/dataset/forest.h5")
+    cv2_imshow(frame)
+    pred=model.predict(x)
+    pred = int(pred[0][0])
+    pred
+    int(pred)
+    if pred==0:
+      print('Forest fire')
+      break
+    else:
+      print("no danger")
+      break
+ 
+# When everything done, release the video capture object
+cap.release()
+ 
+# Closes all the frames
+cv2.destroyAllWindows()
+
+1/1 [==============================] - 0s 84ms/step
+no danger
+SENDING ALERT MESSAGE
+pip install twilio
+Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+Requirement already satisfied: twilio in /usr/local/lib/python3.7/dist-packages (7.15.2)
+Requirement already satisfied: requests>=2.0.0 in /usr/local/lib/python3.7/dist-packages (from twilio) (2.23.0)
+Requirement already satisfied: PyJWT<3.0.0,>=2.0.0 in /usr/local/lib/python3.7/dist-packages (from twilio) (2.6.0)
+Requirement already satisfied: pytz in /usr/local/lib/python3.7/dist-packages (from twilio) (2022.6)
+Requirement already satisfied: chardet<4,>=3.0.2 in /usr/local/lib/python3.7/dist-packages (from requests>=2.0.0->twilio) (3.0.4)
+Requirement already satisfied: urllib3!=1.25.0,!=1.25.1,<1.26,>=1.21.1 in /usr/local/lib/python3.7/dist-packages (from requests>=2.0.0->twilio) (1.24.3)
+Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.7/dist-packages (from requests>=2.0.0->twilio) (2022.9.24)
+Requirement already satisfied: idna<3,>=2.5 in /usr/local/lib/python3.7/dist-packages (from requests>=2.0.0->twilio) (2.10)
+pip install playsound
+Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+Requirement already satisfied: playsound in /usr/local/lib/python3.7/dist-packages (1.3.0)
+pip install pygobject
+Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+Requirement already satisfied: pygobject in /usr/lib/python3/dist-packages (3.26.1)
+from twilio.rest import Client
+from playsound import playsound
+if pred==0:
+  print('Forest fire')
+  account_sid='AC34c4bee5e03df7bc7dba1eef29761275'
+  auth_token='1fc522239435d0c251c1fd870d715295'
+  client=Client(account_sid,auth_token)
+  message=client.messages \
+  .create(
+      body='forest fire is detected,stay alert',
+      #use twilio free number
+      from_='+19803934024',
+      #to number
+      to='+919962082226')
+  print(message.sid)
+  print("Fire detected")
+  print("SMS Sent!")
+elif pred==1:
+  print('No danger')
+No danger
